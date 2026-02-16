@@ -1,3 +1,5 @@
+let licenses = {};
+
 exports.handler = async (event) => {
     const headers = {
         'Access-Control-Allow-Origin': '*',
@@ -18,21 +20,34 @@ exports.handler = async (event) => {
     }
     
     try {
-        const { gameOwnerId, ownerType, gameName, placeId } = JSON.parse(event.body);
+        const { userId, tier, duration } = JSON.parse(event.body);
         
-        console.log('═══════════════════════════════════');
-        console.log('[VIOLATION]');
-        console.log(`Owner: ${gameOwnerId} (${ownerType})`);
-        console.log(`Game: ${gameName}`);
-        console.log(`Place: ${placeId}`);
-        console.log('═══════════════════════════════════');
+        if (!userId) {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({ error: 'userId required' })
+            };
+        }
+        
+        const expiresAt = duration ? Date.now() + (duration * 24 * 60 * 60 * 1000) : null;
+        
+        licenses[userId] = {
+            licensed: true,
+            tier: tier || "free",
+            expiresAt: expiresAt,
+            createdAt: Date.now()
+        };
+        
+        console.log(`[ADD] License: ${userId}`);
         
         return {
             statusCode: 200,
             headers,
-            body: JSON.stringify({ 
-                received: true,
-                message: "Violation reported"
+            body: JSON.stringify({
+                success: true,
+                message: "License added",
+                license: licenses[userId]
             })
         };
     } catch (error) {
