@@ -1,5 +1,5 @@
 const licenses = {
-    "123456789": { 
+    "7974841614": { 
         licensed: true, 
         tier: "premium",
         expiresAt: null
@@ -59,3 +59,4 @@ exports.handler = async (event) => {
         })
     };
 };
+
