@@ -1,4 +1,10 @@
-let licenses = {};
+const licenses = {
+    "123456789": { 
+        licensed: true, 
+        tier: "premium",
+        expiresAt: null
+    }
+};
 
 exports.handler = async (event) => {
     const headers = {
@@ -11,52 +17,45 @@ exports.handler = async (event) => {
         return { statusCode: 200, headers, body: '' };
     }
     
-    if (event.httpMethod !== 'POST') {
+    const pathParts = event.path.split('/');
+    const userId = pathParts[pathParts.length - 1];
+    
+    if (!userId || userId === 'verify') {
         return {
-            statusCode: 405,
+            statusCode: 400,
             headers,
-            body: JSON.stringify({ error: 'Method not allowed' })
+            body: JSON.stringify({ error: "User ID required", licensed: false })
         };
     }
     
-    try {
-        const { userId, tier, duration } = JSON.parse(event.body);
-        
-        if (!userId) {
-            return {
-                statusCode: 400,
-                headers,
-                body: JSON.stringify({ error: 'userId required' })
-            };
-        }
-        
-        const expiresAt = duration 
-            ? Date.now() + (duration * 24 * 60 * 60 * 1000) 
-            : null;
-        
-        licenses[userId] = {
-            licensed: true,
-            tier: tier || "free",
-            expiresAt: expiresAt,
-            createdAt: Date.now()
-        };
-        
-        console.log(`[ADD] License added: ${userId}`);
-        
+    console.log(`[VERIFY] User: ${userId}`);
+    
+    const license = licenses[userId];
+    
+    if (!license) {
         return {
             statusCode: 200,
             headers,
-            body: JSON.stringify({
-                success: true,
-                message: "License added",
-                license: licenses[userId]
-            })
-        };
-    } catch (error) {
-        return {
-            statusCode: 500,
-            headers,
-            body: JSON.stringify({ error: error.message })
+            body: JSON.stringify({ licensed: false, message: "No license found" })
         };
     }
+    
+    if (license.expiresAt && Date.now() > license.expiresAt) {
+        return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({ licensed: false, message: "License expired" })
+        };
+    }
+    
+    return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+            licensed: true,
+            tier: license.tier,
+            expiresAt: license.expiresAt,
+            message: "License valid"
+        })
+    };
 };
