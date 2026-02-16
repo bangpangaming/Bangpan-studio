@@ -1,0 +1,21 @@
+[build]
+  functions = "netlify/functions"
+  publish = "public"
+
+[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/verify/:userId"
+  to = "/.netlify/functions/verify/:userId"
+  status = 200
+
+[[redirects]]
+  from = "/report-violation"
+  to = "/.netlify/functions/report-violation"
+  status = 200
+
+[[redirects]]
+  from = "/add-license"
+  to = "/.netlify/functions/add-license"
+  status = 200
