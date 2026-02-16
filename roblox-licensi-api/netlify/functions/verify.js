@@ -1,4 +1,3 @@
-// Database lisensi sederhana (ganti dengan database real untuk production)
 const licenses = {
     "123456789": { 
         licensed: true, 
@@ -18,7 +17,6 @@ exports.handler = async (event) => {
         return { statusCode: 200, headers, body: '' };
     }
     
-    // Ambil userId dari URL path
     const pathParts = event.path.split('/');
     const userId = pathParts[pathParts.length - 1];
     
@@ -26,14 +24,11 @@ exports.handler = async (event) => {
         return {
             statusCode: 400,
             headers,
-            body: JSON.stringify({
-                error: "User ID required",
-                licensed: false
-            })
+            body: JSON.stringify({ error: "User ID required", licensed: false })
         };
     }
     
-    console.log(`[VERIFY] Checking: ${userId}`);
+    console.log(`[VERIFY] User: ${userId}`);
     
     const license = licenses[userId];
     
@@ -41,10 +36,7 @@ exports.handler = async (event) => {
         return {
             statusCode: 200,
             headers,
-            body: JSON.stringify({
-                licensed: false,
-                message: "No license found"
-            })
+            body: JSON.stringify({ licensed: false, message: "No license found" })
         };
     }
     
@@ -52,10 +44,7 @@ exports.handler = async (event) => {
         return {
             statusCode: 200,
             headers,
-            body: JSON.stringify({
-                licensed: false,
-                message: "License expired"
-            })
+            body: JSON.stringify({ licensed: false, message: "License expired" })
         };
     }
     
